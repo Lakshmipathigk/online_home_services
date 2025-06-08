@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Online Home Services</title>
+</head>
+<body>
+  <h1>Available Services</h1>
+  <ul id="services"></ul>
+  <script>
+    fetch('http://127.0.0.1:5000/services')
+      .then(res => res.json())
+      .then(data => {
+        const ul = document.getElementById('services');
+        data.forEach(service => {
+          const li = document.createElement('li');
+          li.textContent = `${service.name}: ${service.description}`;
+          ul.appendChild(li);
+        });
+      });
+  </script>
+</body>
+</html>
