@@ -1,3 +1,4 @@
+from flask import send_from_directory
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
@@ -45,21 +46,24 @@ def get_services():
     services = Service.query.all()
     return jsonify([{ 'id': s.id, 'name': s.name, 'description': s.description } for s in services])
 
-@app.route('/book', methods=['POST'])
-def book_service():
-    data = request.get_json()
-    if not all(k in data for k in ('user_id', 'service_id', 'date')):
-        return jsonify({"error": "Missing booking information"}), 400
-    booking = Booking(user_id=data['user_id'], service_id=data['service_id'], date=data['date'])
-    db.session.add(booking)
-    db.session.commit()
-    return jsonify({"message": "Service booked successfully"})
+@app.route('/')
+def serve_frontend():
+    return send_from_directory('frontend', 'index.html')
+
 
 def main():
     try:
         with app.app_context():
             db.create_all()
+
+            #  Add this part to insert dummy services if the table is empty
+            if Service.query.count() == 0:
+                db.session.add(Service(name='Plumbing', description='Fixing leaks and pipes'))
+                db.session.add(Service(name='Electrician', description='Electrical repair and installation'))
+                db.session.commit()
+
         app.run(host='127.0.0.1', port=5000, debug=True)
+
     except Exception as e:
         sys.stderr.write(f"Failed to start Flask app: {e}\n")
         return
